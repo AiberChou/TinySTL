@@ -6,6 +6,7 @@
 
 
 namespace TinySTL{
+    
     template <class T1, class T2>
     inline void construct(T1* p, const T2& value){
         // Call T1::T1(value) to initialize, with the address starting at p
@@ -17,12 +18,16 @@ namespace TinySTL{
         pointer->~T();
     }
 
+    // if "value_type" has non-trivial destructor, that is "value_type" has 
+    // its own defined destructor, we need to call this function. Otherwise,
+    // the destructor is trivial, calls it many times will influence speed
     template<class ForwardIterator>
     inline void __destroy_aux(ForwardIterator first,ForwardIterator last,_false_type trait){
         for(;first<last;++first){
             destroy(&*first);
         }
     }
+
     template<class ForwardIterator>
     inline void __destroy_aux(ForwardIterator first,ForwardIterator last,_true_type trait){
 
