@@ -7,18 +7,16 @@
 
 namespace TinySTL{
     
-    // First-level allocator, "inst" is for different specialization, 
-    // such as debug using inst = 0, while release using inst = 1
-    template <int inst>
-    class __malloc_alloc_template{
+    class __malloc_alloc{
     private:
         typedef void(*ptr)();
         static void *oom_malloc(size_t n);
         static void *oom_realloc(void* p, size_t n);
-        static void (* __malloc_alloc_oom_handler)();
+        static void (* __malloc_alloc_oom_handler)(); // declare in class
     public:
+
         static void* allocate(size_t n){
-            void* result = malloc(n); //using malloc to get storage and free to release.
+            void* result = malloc(n); // using malloc to get storage and free to release.
             // if fail to get storage using oom_malloc
             if (result == nullptr) result = oom_malloc(n);
             return result;
@@ -40,10 +38,51 @@ namespace TinySTL{
         // set_malloc _handler is a function, which parameter is a function 
         // pointer, and then combine with "*", that means it returns a void
         // pointer, last combine with "()", so it returns a void func pointer
-        static ptr set_malloc_handler(ptr){
+        static ptr set_malloc_handler(ptr f){
             void (*old)() = __malloc_alloc_oom_handler;
             __malloc_alloc_oom_handler = f;
             return (old);
         }
+    };
+
+
+    class __default_alloc{
+    private:
+        enum EAlign{ ALIGN=8}; // up-regulated boundary
+        enum EMaxBytes{ MAXBYTES=128}; // upper boundary
+        enum ENFreeLists{ NFREELISTS= (EMaxBytes::MAXBYTES / EAlign::ALIGN)}; // number of free-lists
+        
+        // round up bytes to multiple of 8         
+        static size_t round_up(size_t bytes){
+            return ((bytes) + EAlign::ALIGN -1) & ~(EAlign::ALIGN - 1);
+        }
+
+        union obj{
+            union obj* free_list_link;
+            char client_data[1];  
+        };
+
+        // chunk allocation state, only changed in function chunk_alloc
+        static char* start_free; // start of memory pool
+        static char* end_free;  // end of memory pool
+        static size_t heap_size;
+
+        // "volatile" prevents from optimizing by compiler, if not, data may be load to
+        // register, result in thread lock invalid. use volatile, ensure thread safe
+        static obj* volatile free_list[ENFreeLists::NFREELISTS];
+        
+        static size_t freelist_index(size_t bytes){
+            return (((bytes) + EAlign::ALIGN -1)/EAlign::ALIGN - 1);
+        }
+
+        // refill freelist while freelist have no memory left
+        static void* refill(size_t n);
+        // get memory chunk for freelist to allocate, chunk number is nobjs 
+        static char* chunk_alloc(size_t size, int& nobjs);
+
+    public:
+        static void* allocate(size_t n);
+        static void deallocate(void* p, size_t n);
+        static void* reallocate(void* p, size_t n);
     };
 }
