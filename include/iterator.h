@@ -7,7 +7,7 @@ namespace TinySTL{
     // for tag type
     struct input_iterator_tag{};
     struct output_iterator_tag{};
-    struct forward_iterator_tag : public input_iterator_tag{};
+    struct forward_iterator_tag : public input_iterator_tag{}; //if there is no matching function, call function matchs "input_iterator_tag" 
     struct bidirectional_iterator_tag : public forward_iterator_tag{};
     struct random_access_iterator_tag : public bidirectional_iterator_tag{};
     
@@ -71,6 +71,6 @@ namespace TinySTL{
     template <class Iterator>
     inline typename iterator_traits<Iterator>::value_type* 
     value_type(const Iterator& It){
-        return static_cast<typename iterator_traits<Iterator>::value_type>(0);
+        return static_cast<typename iterator_traits<Iterator>::value_type*>(0);
     }
 }

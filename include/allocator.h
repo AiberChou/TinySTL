@@ -7,7 +7,7 @@
 namespace TinySTL{
 
     template <class T>
-    inline T* _allocate(ptrdiff_t size, T*){
+    inline T* _allocate(ptrdiff_t size, T* t){
         std::set_new_handler(0);
         // "::" is used to represent global variate, keyword "new" is 
         // composed of "operator new" and "constructor", operator new 
