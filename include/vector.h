@@ -16,18 +16,21 @@ in all this class. So u needn't declare this function before u use it.
 #include "construct.h"
 #include "uninitialized.h"
 #include "algorithm.h"
+#include <cstddef> //for size_t,ptrdiff_t
 
 namespace TinySTL{
 
     template<class T,class Alloc=default_alloc>
     class vector{
     public:
-        typedef T               value_type;
-        typedef value_type*     pointer;
-        typedef value_type*     iterator;
-        typedef value_type&     reference;
-        typedef size_t          size_type;
-        typedef ptrdiff_t       difference_type;
+        typedef T                   value_type;
+        typedef value_type*         pointer;
+        typedef value_type*         iterator;
+        typedef const value_type*   const_iterator;
+        typedef value_type&         reference;
+        typedef const value_type&   const_reference;
+        typedef size_t              size_type;
+        typedef ptrdiff_t           difference_type;
 
     protected:
         typedef simple_alloc<value_type, Alloc> data_allocator;
@@ -36,75 +39,54 @@ namespace TinySTL{
         iterator finish;
         iterator end_of_storage;
 
-        void insert_aux(iterator position, const T& x);
-        void deallocate(){
-            if(start)
-                data_allocator::deallocate(start,end_of_storage - start);
-        }
-        void fill_initialize(size_type n, const T& value){
-            start = allocate_and_fill(n,value);
-            finish = start + n;
-            end_of_storage = finish;
-        }
-
     public:
+        // Iterator Function
         iterator begin(){return start;}
         iterator end(){return finish;}
+
+        // Access Function
+        reference front(){return *begin();}
+        reference back(){return *(end()-1);}
+        reference operator[](size_type n){return *(begin()+n);}
+
+        // Capacity Function
+        // function "resize" change size(), but capacity() remains unchanged.
         size_type size() const{return size_type(end()-begin());}
         size_type capacity() const{return size_type(end_of_storage-begin());}
         bool empty() const{return begin()==end();}
-        reference operator[](size_type n){return *(begin()+n);}
+        void resize(size_type new_size, const T& x);
+        void resize(size_type new_size){resize(new_size,T());};
+        void reserve(size_type new_size);
+
+        // Constructor Function
+        vector():start(0),finish(0),end_of_storage(0){}
+        explicit vector(size_type n){allocate_and_fill(n,T());}
+        vector(size_type n,const T& value){allocate_and_fill(n,value);}
+        template<class InputIterator>
+        vector(InputIterator begin,InputIterator end){allocate_and_copy();}
+        vector(const vector& other);
+        vector(vector&& other);
+        vector& operator=(const vector& other);
+        vector& operator=(const vector&& other);
         
-        vector():start(0),end(0),end_of_storage(0){}
-        vector(size_type n,const T& value){fill_initialize(n,value);}
-        vector(iterator begin,iterator end)
-        explicit vector(size_type n){fill_initialize(n,T());}
+        ~vector(){destroy_and_deallocate();}
 
-        ~vector(){
-            destroy(start,finish);
-            deallocate();
-        }
-
-        reference front(){return *begin();}
-        reference back(){return *(end()-1);}
-        void push_back(const T&x){
-            if(finish != end_of_storage){
-                construct(finish,x);
-                finish++;
-            }
-            else{
-                insert_aux(end(),x);
-            }
-        }
-
-        void pop_back(){
-            --finish;
-            destroy(finish);
-        }
-
-        iterator erase(iterator position){
-            if(position + 1 != end()){
-                copy(position+1,finish,position);
-            }
-            --finish;
-            destroy(finish);
-            return position;
-        }
-
-        void resize(size_type new_size, const T& x){
-            if(new_size<size()) erase(begin()+new_size,end());
-            else insert(end, new_size-size(), x);
-        }
-
-        void resize(size_type new_size){ resize(new_size,T());}
+        // Modify Element Function
+        void push_back(const T&x);
+        void pop_back();
+        iterator insert(iterator position, const T& x);
+        iterator insert(iterator position, size_type n,const T& x);
+        iterator erase(iterator position);
+        iterator erase(iterator first,iterator last);
         void clear(){erase(begin(),end());}
 
     protected:
-        iterator allocate_and_fill(size_type n,const T& x){
-            iterator result = data_allocator::allocate(n);
-            uninitialized_fill_n(result,n,x);
-            return result;
-        }
+        // Auxiliary Function
+        void deallocate();
+        void allocate_and_fill(size_type n,const T& x);
+        template<class InputIterator>
+        void allocate_and_copy(InputIterator first,InputIterator last);
+        void destroy_and_deallocate();
     };
 
     
