@@ -28,4 +28,12 @@ namespace TinySTL{
         }
         return result;
     }
+
+    template<class BidirectionIterator>
+    BidirectionIterator copy_backward(BidirectionIterator first,BidirectionIterator last,BidirectionIterator d_last){
+        while(first!=last){
+            *(--d_last)=*(--last);
+        }
+        return d_last;
+    }
 }
