@@ -3,6 +3,7 @@
 #include "iterator.h"
 #include "traits.h"
 #include "construct.h"
+#include "algorithm.h"
 
 namespace TinySTL{
 
