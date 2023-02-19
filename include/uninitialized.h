@@ -8,7 +8,7 @@
 namespace TinySTL{
 
     // compare with _true_type function, this function has a loop.So it is unsuitable to be declared as a inline function
-    template<class InputIterator, class ForwardIterator, class T>
+    template<class InputIterator, class ForwardIterator>
     ForwardIterator __uninitialized_copy_aux(
             InputIterator first, InputIterator last, ForwardIterator result, _false_type fp){
         ForwardIterator cur = result;
@@ -18,7 +18,7 @@ namespace TinySTL{
         return cur;
     }
 
-    template<class InputIterator, class ForwardIterator, class T>
+    template<class InputIterator, class ForwardIterator>
     inline ForwardIterator __uninitialized_copy_aux(
             InputIterator first, InputIterator last, ForwardIterator result, _true_type tp){
         return copy(first,last,result);
@@ -26,7 +26,7 @@ namespace TinySTL{
 
     template<class InputIterator, class ForwardIterator, class T>
     inline ForwardIterator __uninitialized_copy(
-            InputIterator first, InputIterator last, ForwardIterator result, T* t){
+            InputIterator first, InputIterator last, ForwardIterator result, T* pod){
         typedef typename __type_traits<T>::is_POD_type is_POD;
         return __uninitialized_copy_aux(first,last,result,is_POD());
     }
@@ -55,10 +55,10 @@ namespace TinySTL{
         return fill(first,last,x);
     }
 
-    template<class ForwardIterator, class T>
+    template<class ForwardIterator, class T, class T1>
     inline ForwardIterator __uninitialized_fill(
-            ForwardIterator first, ForwardIterator last, const T& x){
-        typedef typename __type_traits<T>::is_POD_type is_POD;
+            ForwardIterator first, ForwardIterator last, const T& x, const T1* pod){
+        typedef typename __type_traits<T1>::is_POD_type is_POD;
         return __uninitialized_fill_aux(first,last,x,is_POD());
     }
 
@@ -88,7 +88,7 @@ namespace TinySTL{
 
     template<class ForwardIterator, class Size, class T, class T1>
     inline ForwardIterator __uninitialized_fill_n(
-            ForwardIterator first, Size n, const T& x,T1* t){
+            ForwardIterator first, Size n, const T& x,T1* pod){
         typedef typename __type_traits<T1>::is_POD_type is_POD;
         return __uninitialized_fill_n_aux(first,n,x,is_POD());
     }

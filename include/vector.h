@@ -43,6 +43,8 @@ namespace TinySTL{
         // Iterator Function
         iterator begin(){return start;}
         iterator end(){return finish;}
+        const_iterator begin()const{return start;}
+        const_iterator end()const{return finish;}
 
         // Access Function
         reference front(){return *begin();}
@@ -63,7 +65,7 @@ namespace TinySTL{
         explicit vector(size_type n){allocate_and_fill(n,T());}
         vector(size_type n,const T& value){allocate_and_fill(n,value);}
         template<class InputIterator>
-        vector(InputIterator begin,InputIterator end){allocate_and_copy();}
+        vector(InputIterator begin,InputIterator end){allocate_and_copy(begin,end);}
         vector(const vector& other);
         vector(vector&& other);
         vector& operator=(const vector& other);
@@ -95,4 +97,4 @@ namespace TinySTL{
 // because while compiling, template class(and so on) will not 
 // allocate memory until a template be called. If not do so, while
 // linking, some errors will happen.
-#include "../src/vector.cpp"
+#include "../src/vector.tpp"

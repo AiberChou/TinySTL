@@ -132,5 +132,4 @@ namespace TinySTL{
         typedef _true_type has_trivial_destructor;
         typedef _true_type is_POD_type;
     };
-    
 }

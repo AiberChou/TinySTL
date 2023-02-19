@@ -6,7 +6,7 @@ namespace TinySTL{
     template<class T,class Alloc>
     inline void vector<T,Alloc>::resize(size_type new_size, const T& x){
         if(new_size<size()) erase(begin()+new_size,end());
-        else TinySTL::insert(end,new_size-size(),x)
+        else insert(end,new_size-size(),x);
     }
 
     template<class T,class Alloc>
@@ -39,13 +39,13 @@ namespace TinySTL{
     }
 
     template<class T,class Alloc>
-    vector<T,Alloc>::iterator vector<T,Alloc>::insert(iterator position,const T& x){
+    typename vector<T,Alloc>::iterator vector<T,Alloc>::insert(iterator position,const T& x){
         // if there is memory left
-        if(finish!=end_of_storage){
+        if(finish != end_of_storage){
             // if using copy_backward(position,finish-1,finish), can we remove construct()?
             TinySTL::construct(finish,*(finish-1)); // copy last elem to the back
             ++finish;
-            T* x_copy = x;
+            T x_copy = x;
             // move all elem behind "position" back by one, contains "position"
             TinySTL::copy_backward(position,finish-2,finish-1);
             *position = x_copy; //insert
@@ -67,7 +67,7 @@ namespace TinySTL{
                 TinySTL::construct(new_finish,x);
                 // copy elem which behind "position"
                 ++new_finish;
-                new_finish = TinySTL::uninitialized_copy(position,finish,new_finish)
+                new_finish = TinySTL::uninitialized_copy(position,finish,new_finish);
             }
             catch(...){
                 // recycle new allocated memory in heap;
@@ -86,11 +86,11 @@ namespace TinySTL{
     }
 
     template<class T,class Alloc>
-    vector<T,Alloc>::iterator vector<T,Alloc>::insert(iterator position, size_type n, const T& x){
+    typename vector<T,Alloc>::iterator vector<T,Alloc>::insert(iterator position, size_type n, const T& x){
         if(n==0) return position;
         else{
             if(size_type(end_of_storage-finish)>n){
-                T* x_copy = x;
+                T x_copy = x;
                 // for class T must call "uninitialized_fill_n" or other function for "construct", 
                 // otherwise u can't get memory to allocate for new elements.
                 TinySTL::uninitialized_fill_n(finish,n,x_copy);
@@ -125,7 +125,7 @@ namespace TinySTL{
     }
 
     template<class T,class Alloc>
-    vector<T,Alloc>::iterator vector<T,Alloc>::erase(iterator position){
+    typename vector<T,Alloc>::iterator vector<T,Alloc>::erase(iterator position){
         if(position + 1 != end()){
                 TinySTL::copy(position+1,finish,position);
         }
@@ -135,7 +135,7 @@ namespace TinySTL{
     }
 
     template<class T,class Alloc>
-    vector<T,Alloc>::iterator vector<T,Alloc>::erase(iterator first,iterator last){
+    typename vector<T,Alloc>::iterator vector<T,Alloc>::erase(iterator first,iterator last){
         iterator i=TinySTL::copy(last,finish,first);
         destroy(i,finish);
         finish = finish - (last - first);

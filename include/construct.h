@@ -34,7 +34,7 @@ namespace TinySTL{
     }
 
     template<class ForwardIterator, class T>
-    inline void __destory(ForwardIterator first, ForwardIterator last, T* trait){
+    inline void __destroy(ForwardIterator first, ForwardIterator last, T* trait){
         typedef typename __type_traits<T>::has_trivial_destructor trivial_destructor;
         __destroy_aux(first,last,trivial_destructor());
     }
